@@ -53,7 +53,7 @@ export default function LandingPage() {
 
         <motion.div {...fadeUp} className="relative max-w-6xl mx-auto text-center">
           <h1 className="text-6xl md:text-7xl font-extrabold leading-tight mb-8">
-            University Management,
+            UMS,
             <br />
             <span className="text-indigo-600">Unified.</span>
           </h1>
