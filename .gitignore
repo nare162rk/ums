@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Firebase Secret Key (Backend)
+server/serviceAccountKey.json
+
+# Environment Variables (Frontend & Backend)
+.env
+.env.local
+
+# Node modules
+server/node_modules/
+
+# Firebase Admin SDK Private Key
+server/serviceAccountKey.json
