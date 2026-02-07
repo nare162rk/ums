@@ -11,3 +11,16 @@
     animation: marquee 20s linear infinite;
   }
 }
+/* In your index.css */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-50px); }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 10s infinite ease-in-out;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
+import AdminApprovalPage from './pages/AdminApprovalPage';
+import RegistrationPage from './pages/RegistrationPage';
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
 
         {/* Shows Dashboard on http://localhost:5173/dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/university-registraction" element={<RegistrationPage />} />
+        <Route path="/admin" element={<AdminApprovalPage />} />
       </Routes>
     </Router>
   );

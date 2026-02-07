@@ -70,9 +70,14 @@ export default function LoginPage() {
         className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 md:p-10"
       >
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-indigo-600 text-white mb-4 shadow-lg shadow-indigo-200">
-            <ShieldCheck size={32} />
-          </div>
+          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-white mb-4 shadow-lg shadow-indigo-200">
+  <img
+    src="/logo.png"
+    alt="UMS Logo"
+    className="h-20 w-15 object-contain"
+  />
+</div>
+
           <h2 className="text-3xl font-bold text-slate-900">Welcome Back</h2>
           <p className="text-slate-500 mt-2">Access the UMS Portal</p>
         </div>
