@@ -104,7 +104,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="py-12 text-center text-sm text-slate-500 bg-white border-t">
-        © 2026 UMS — University Management System Powerby Grambasket Private Limited
+        © 2026 UMS — University Management System, Powerby Grambasket Private Limited
       </footer>
     </div>
   );
