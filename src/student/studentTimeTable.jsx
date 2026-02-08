@@ -1,4 +1,6 @@
 import React from 'react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const StudentTimetable = () => {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -21,91 +23,111 @@ const StudentTimetable = () => {
     "2-3": { code: "PALO ALTO COURSE", faculty: "(DRR)" },
     "3-0": { code: "303105300", faculty: "(Mr. KEVAL JAYESHBHAI MEHTA)" },
     "4-0": { code: "303105395", faculty: "(Mr. HEENA KARBHARI)" },
-    // ... add more as needed
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 font-sans text-[11px]">
-      {/* Header Info */}
-      <div className="bg-white border-b p-3 flex justify-between items-center mb-4 shadow-sm">
-        <h1 className="text-gray-500 text-lg font-light">Student Timetable <span className="text-[10px] uppercase">KARNATI LOHITHA SHRE</span></h1>
-      </div>
+    <div className="min-h-screen flex flex-col bg-gray-100 font-sans">
+      <Header />
 
-      <div className="bg-white border border-gray-300 shadow-sm rounded-sm p-4 overflow-x-auto">
-        {/* Timetable Branding */}
-        <div className="flex justify-between items-start mb-6">
-           <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white font-bold">P</div>
-              <div className="leading-tight">
-                <p className="text-red-600 font-bold text-sm">Parul University</p>
-              </div>
-           </div>
-           <div className="text-center">
-              <h2 className="text-sm font-bold">Parul Institute of Engineering & Technology (First Shift)</h2>
-           </div>
-           <div className="text-right leading-tight">
-              <p className="font-bold">Student Timetable</p>
-              <p>PIET-BTech-CSE-6CYBER1</p>
-              <p>w.e.f 07-02-2026</p>
-           </div>
+      <main className="flex-grow p-4 md:p-8">
+        {/* Header Info */}
+        <div className="max-w-7xl mx-auto bg-white border-b p-4 flex justify-between items-center mb-4 shadow-sm rounded-t-lg">
+          <h1 className="text-gray-500 text-lg font-light">
+            Student Timetable <span className="text-[10px] uppercase font-bold text-blue-600 ml-2">Lohitha Shre</span>
+          </h1>
         </div>
 
-        {/* Timetable Grid */}
-        <table className="w-full border-collapse border border-gray-400 text-center">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="border border-gray-400 p-2 w-32">Time Slot</th>
-              {days.map(day => (
-                <th key={day} className="border border-gray-400 p-2">
-                  <p>{day}</p>
-                  <p className="text-[9px] font-normal text-gray-500">02-02-2026</p>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {timeSlots.map((slot, timeIdx) => (
-              <tr key={timeIdx} className={slot.type === "BREAK" ? "bg-gray-50 h-8" : "h-16"}>
-                <td className="border border-gray-400 font-bold p-1 bg-gray-50">
-                  {slot.time}
-                </td>
-                
-                {days.map((_, dayIdx) => {
-                  if (slot.type === "BREAK") {
-                    return <td key={dayIdx} className="border border-gray-400 text-gray-400 italic">BREAK</td>;
-                  }
-                  
-                  const entry = scheduleData[`${dayIdx}-${timeIdx}`];
-                  return (
-                    <td key={dayIdx} className="border border-gray-400 p-1 align-middle">
-                      {entry ? (
-                        <div>
-                          <p className="font-bold text-blue-800">{entry.code}</p>
-                          <p className="text-gray-600 italic">{entry.faculty}</p>
-                        </div>
-                      ) : null}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="max-w-7xl mx-auto bg-white border border-gray-300 shadow-sm rounded-sm p-6 overflow-x-auto">
+          {/* Timetable Branding */}
+          <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md">P</div>
+              <div className="leading-tight">
+                <p className="text-red-600 font-black text-lg tracking-tight">Parul University</p>
+                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Vadodara, Gujarat</p>
+              </div>
+            </div>
+            <div className="text-center md:absolute md:left-1/2 md:-translate-x-1/2">
+              <h2 className="text-sm font-black text-gray-800 uppercase tracking-tight">Parul Institute of Engineering & Technology</h2>
+              <p className="text-[11px] text-gray-500 font-medium">(First Shift)</p>
+            </div>
+            <div className="text-right leading-tight text-[11px]">
+              <p className="font-black text-gray-800 uppercase">Academic Schedule</p>
+              <p className="text-blue-600 font-bold">PIET-BTech-CSE-6CYBER1</p>
+              <p className="text-gray-400">w.e.f 07-02-2026</p>
+            </div>
+          </div>
 
-        {/* Legend / Subject Codes Section */}
-        <div className="mt-6 border-t pt-4">
-          <p className="font-bold mb-2">Subject:</p>
-          <div className="grid grid-cols-6 gap-2 text-[10px] text-gray-600">
-            {Object.keys(scheduleData).map((key, i) => (
-              <span key={i}>• {scheduleData[key].code}</span>
-            ))}
+          {/* Timetable Grid */}
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300 text-center text-[11px]">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-3 w-32 font-bold uppercase text-gray-600">Time Slot</th>
+                  {days.map(day => (
+                    <th key={day} className="border border-gray-300 p-3 min-w-[120px]">
+                      <p className="font-black text-gray-700 uppercase tracking-wider">{day}</p>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {timeSlots.map((slot, timeIdx) => (
+                  <tr key={timeIdx} className={slot.type === "BREAK" ? "bg-gray-50/80 h-10" : "h-20"}>
+                    <td className="border border-gray-300 font-bold p-2 bg-gray-50 text-gray-700">
+                      {slot.time}
+                    </td>
+                    
+                    {days.map((_, dayIdx) => {
+                      if (slot.type === "BREAK") {
+                        return (
+                          <td key={dayIdx} className="border border-gray-300 text-gray-300 italic font-medium tracking-[0.2em] uppercase text-[9px]">
+                            Break
+                          </td>
+                        );
+                      }
+                      
+                      const entry = scheduleData[`${dayIdx}-${timeIdx}`];
+                      return (
+                        <td key={dayIdx} className="border border-gray-300 p-2 align-middle transition-colors hover:bg-blue-50/30">
+                          {entry ? (
+                            <div className="space-y-1">
+                              <p className="font-black text-blue-900 leading-none">{entry.code}</p>
+                              <div className="h-[1px] w-4 bg-blue-200 mx-auto my-1"></div>
+                              <p className="text-gray-500 italic text-[10px] leading-tight">{entry.faculty}</p>
+                            </div>
+                          ) : (
+                            <span className="text-gray-200">-</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Legend / Subject Codes Section */}
+          <div className="mt-8 border-t border-dashed pt-6">
+            <p className="font-black text-xs uppercase tracking-widest text-gray-400 mb-4">Subject Reference:</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 text-[10px]">
+              {Object.keys(scheduleData).map((key, i) => (
+                <div key={i} className="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-100">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                  <span className="font-bold text-gray-700">{scheduleData[key].code}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 text-[9px] font-bold text-gray-300 uppercase tracking-widest">
+             System Printed : 08-02-2026 06:40 PM
           </div>
         </div>
+      </main>
 
-        <div className="mt-8 text-[9px] text-gray-400">
-           Printed On : 07-02-2026 07:43 AM
-        </div>
-      </div>
+      <Footer />
     </div>
   );
 };

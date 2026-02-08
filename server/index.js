@@ -46,16 +46,16 @@ async function generateUniversityId() {
   });
 }
 
-// --- NO '/api' PREFIX ROUTES ---
+// --- UNIVERSITY & AUTH ROUTES ---
 
-// 1. Onboard Route (Matches RegistrationPage.jsx:41)
+// 1. Onboard Route (Updated with GST, PAN, and Document fields)
 app.post("/universities/onboard", async (req, res) => {
   try {
     const universityId = await generateUniversityId();
     const universityData = {
-      ...req.body,
+      ...req.body, // Receives all fields: GST, PAN, Address, etc.
       universityId,
-      status: "pending",
+      status: "pending", // Default inactive until approved
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     };
     await db.collection("universities").doc(universityId).set(universityData);
@@ -65,7 +65,64 @@ app.post("/universities/onboard", async (req, res) => {
   }
 });
 
-// 2. Admin Get Route (Matches AdminDashboard fetch)
+// 2. Login Verify (Updated with Domain and Approval Logic)
+app.post("/auth/verify", async (req, res) => {
+  try {
+    const { token, originDomain } = req.body; // Expects domain from frontend
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    const email = decodedToken.email;
+
+    // Check if University exists with this official admin email
+    const uniSnapshot = await db.collection("universities")
+      .where("admin.officialEmail", "==", email).limit(1).get();
+
+    if (uniSnapshot.empty) {
+      return res.status(403).json({ success: false, message: "No institution found for this email." });
+    }
+
+    const uniData = uniSnapshot.docs[0].data();
+
+    // Block if account is not approved by system admin
+    if (uniData.status !== "approved") {
+      return res.status(403).json({ success: false, message: "Institution pending approval." });
+    }
+
+    // Domain matching: Allow 'localhost' for development, else check registered misUrl
+    if (originDomain !== "localhost" && uniData.misUrl !== originDomain) {
+      return res.status(403).json({ success: false, message: "Unauthorized login origin." });
+    }
+
+    res.json({ 
+      success: true, 
+      role: "uni-admin", 
+      user: email, 
+      university: uniData 
+    });
+  } catch (error) {
+    res.status(401).json({ success: false });
+  }
+});
+
+// 3. Multi-Tenant Student Addition (Stored university-wise)
+app.post("/students/add", async (req, res) => {
+  const { universityId, enrollmentNumber, studentDetails } = req.body;
+  try {
+    // Nested storage: students/{uniId}/students/{enrollment}
+    await db.collection("students").doc(universityId)
+      .collection("students").doc(enrollmentNumber)
+      .set({
+        ...studentDetails,
+        universityId,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    res.status(201).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// --- ADMIN CONTROL ROUTES ---
+
 app.get("/admin/universities", async (req, res) => {
   try {
     const snapshot = await db.collection("universities").orderBy("createdAt", "desc").get();
@@ -76,7 +133,6 @@ app.get("/admin/universities", async (req, res) => {
   }
 });
 
-// 3. Admin Status Update (Matches handleStatusUpdate)
 app.patch("/admin/status/:id", async (req, res) => {
   try {
     await db.collection("universities").doc(req.params.id).update({
@@ -89,21 +145,36 @@ app.patch("/admin/status/:id", async (req, res) => {
   }
 });
 
-// 4. Login Verify (Your existing logic)
-app.post("/auth/verify", async (req, res) => {
+// --- ACADEMIC & FINANCIAL ROUTES ---
+
+app.get("/attendance/stats/:studentId", async (req, res) => {
   try {
-    const decodedToken = await admin.auth().verifyIdToken(req.body.token);
-    const uniSnapshot = await db.collection("universities").where("admin.officialEmail", "==", decodedToken.email).limit(1).get();
-    if (uniSnapshot.empty) return res.status(403).json({ success: false });
-    const uniData = uniSnapshot.docs[0].data();
-    if (uniData.status !== "approved") return res.status(403).json({ success: false });
-    res.json({ success: true, user: decodedToken.email, university: uniData });
+    const { studentId } = req.params;
+    const doc = await db.collection("attendance").doc(studentId).get();
+    if (!doc.exists) return res.status(404).json({ error: "No records found" });
+    res.status(200).json(doc.data());
   } catch (error) {
-    res.status(401).json({ success: false });
+    res.status(500).json({ error: error.message });
   }
 });
 
-const PORT = 5000; // Fixed to 5000 as per your error log
+app.get("/fees/summary/:studentId", async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const feeDoc = await db.collection("fees").doc(studentId).get();
+    if (!feeDoc.exists) {
+      return res.status(200).json({
+        stats: { total: 0, paid: 0, balance: 0, outstanding: 0 },
+        academicFees: [], hostelFees: []
+      });
+    }
+    res.status(200).json(feeDoc.data());
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const PORT = 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });

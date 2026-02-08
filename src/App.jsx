@@ -40,8 +40,8 @@ function App() {
 
 
         <Route path="/StudentAttendance" element={<StudentAttendance/>} />
-        <Route path="/results" element={<Results/>} />
-        <Route path="/FeePortal" element={<FeePortal/>} />
+        <Route path="/studentResults" element={<Results/>} />
+        <Route path="/studentFee" element={<FeePortal/>} />
 
 
       </Routes>
