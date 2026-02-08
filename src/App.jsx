@@ -10,6 +10,9 @@ import Footer from './components/Footer';
 import StudentDashboard from './student/dashboard';
 import StudentPortal from './student/studentprofile';
 import StudentTimetable from './student/studentTimeTable';
+import StudentAttendance from './student/studentAttendance';
+import Results from './student/Result';
+import FeePortal from './student/Fee';
 function App() {
   return (
     <Router>
@@ -25,6 +28,7 @@ function App() {
         <Route path="/university-registraction" element={<RegistrationPage />} />
         <Route path="/admin" element={<AdminApprovalPage />} />
 
+
         <Route path="/Header" element={<Header />} />
         <Route path="/Footer" element={<Footer />} />
 
@@ -33,6 +37,11 @@ function App() {
          <Route path="/studentDashboard" element={<StudentDashboard />} />
           <Route path="/studentProfile" element={<StudentPortal />} />
            <Route path="/studentTimetable" element={<StudentTimetable />} />
+
+
+        <Route path="/StudentAttendance" element={<StudentAttendance/>} />
+        <Route path="/results" element={<Results/>} />
+        <Route path="/FeePortal" element={<FeePortal/>} />
 
 
       </Routes>
