@@ -8,7 +8,7 @@ import RegistrationPage from './pages/RegistrationPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import StudentDashboard from './student/dashboard';
-import StudentPortal from './student/studentprofile';
+import StudentProfile from './student/studentprofile';
 import StudentTimetable from './student/studentTimeTable';
 import StudentAttendance from './student/studentAttendance';
 import Results from './student/Result';
@@ -35,7 +35,7 @@ function App() {
         
 
          <Route path="/studentDashboard" element={<StudentDashboard />} />
-          <Route path="/studentProfile" element={<StudentPortal />} />
+          <Route path="/studentProfile" element={<StudentProfile />} />
            <Route path="/studentTimetable" element={<StudentTimetable />} />
 
 
