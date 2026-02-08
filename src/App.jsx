@@ -13,11 +13,18 @@ import StudentTimetable from './student/studentTimeTable';
 import StudentAttendance from './student/studentAttendance';
 import Results from './student/Result';
 import FeePortal from './student/Fee';
+
 import AdminAttendanceS from './Admin/adminAtt(students)';
 import AdminAttendance from './Admin/adminAttendance';
 import AdminDashboard from './Admin/Dashboard';
 import AdminProfile from './Admin/Profile';
 import AdminTimetableManager from './Admin/TimetableManager';
+
+import StaffAttendance from './staff/attendance';
+import StaffDashboard from './staff/Dashboard';
+import StaffProfile from './staff/profile';
+import StaffTimetable from './staff/Timetable';
+
 function App() {
   return (
     <Router>
@@ -47,6 +54,11 @@ function App() {
         <Route path="/StudentAttendance" element={<StudentAttendance/>} />
         <Route path="/results" element={<Results/>} />
         <Route path="/FeePortal" element={<FeePortal/>} />
+        <Route path="/staffattendance" element={<StaffAttendance/>} />
+        <Route path="/staffDashboard" element={<StaffDashboard/>} />
+        <Route path="/staffprofile" element={<StaffProfile/>} />
+        <Route path="/staffTimetable" element={<StaffTimetable/>} />
+
 
         <Route path="/AdminAttendanceS" element={<AdminAttendanceS/>} />
         <Route path="/AdminAttendance" element={<AdminAttendance/>} />
