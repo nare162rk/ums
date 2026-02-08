@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import AdminApprovalPage from './pages/AdminApprovalPage';
 import RegistrationPage from './pages/RegistrationPage';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -20,6 +22,10 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/university-registraction" element={<RegistrationPage />} />
         <Route path="/admin" element={<AdminApprovalPage />} />
+        <Route path="/Header" element={<Header />} />
+        <Route path="/Footer" element={<Footer />} />
+
+        
       </Routes>
     </Router>
   );
