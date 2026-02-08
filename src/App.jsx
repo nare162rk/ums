@@ -7,7 +7,9 @@ import AdminApprovalPage from './pages/AdminApprovalPage';
 import RegistrationPage from './pages/RegistrationPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
-
+import StudentDashboard from './student/dashboard';
+import StudentPortal from './student/studentprofile';
+import StudentTimetable from './student/studentTimeTable';
 function App() {
   return (
     <Router>
@@ -22,10 +24,17 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/university-registraction" element={<RegistrationPage />} />
         <Route path="/admin" element={<AdminApprovalPage />} />
+
         <Route path="/Header" element={<Header />} />
         <Route path="/Footer" element={<Footer />} />
 
         
+
+         <Route path="/studentDashboard" element={<StudentDashboard />} />
+          <Route path="/studentProfile" element={<StudentPortal />} />
+           <Route path="/studentTimetable" element={<StudentTimetable />} />
+
+
       </Routes>
     </Router>
   );
