@@ -178,3 +178,40 @@ const PORT = 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
+// --- 5. Student Attendance Routes ---
+
+// Fetch overall attendance stats for a student
+app.get("/attendance/stats/:studentId", async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const doc = await db.collection("attendance").doc(studentId).get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ error: "Attendance records not found" });
+    }
+
+    res.status(200).json(doc.data());
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Fetch detailed logs for a specific day
+app.get("/attendance/detail/:studentId/:date", async (req, res) => {
+  try {
+    const { studentId, date } = req.params; // date format: DD-MM-YYYY
+    const dayDoc = await db.collection("attendance")
+      .doc(studentId)
+      .collection("dailyLogs")
+      .doc(date)
+      .get();
+
+    if (!dayDoc.exists) {
+      return res.json({ status: "No Record", slots: "None" });
+    }
+
+    res.status(200).json(dayDoc.data());
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});

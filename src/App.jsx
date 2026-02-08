@@ -8,11 +8,16 @@ import RegistrationPage from './pages/RegistrationPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import StudentDashboard from './student/dashboard';
-import StudentProfile from './student/studentprofile';
+import StudentPortal from './student/studentprofile';
 import StudentTimetable from './student/studentTimeTable';
 import StudentAttendance from './student/studentAttendance';
 import Results from './student/Result';
 import FeePortal from './student/Fee';
+import AdminAttendanceS from './Admin/adminAtt(students)';
+import AdminAttendance from './Admin/adminAttendance';
+import AdminDashboard from './Admin/Dashboard';
+import AdminProfile from './Admin/Profile';
+import AdminTimetableManager from './Admin/TimetableManager';
 function App() {
   return (
     <Router>
@@ -35,15 +40,19 @@ function App() {
         
 
          <Route path="/studentDashboard" element={<StudentDashboard />} />
-          <Route path="/studentProfile" element={<StudentProfile />} />
+          <Route path="/studentProfile" element={<StudentPortal />} />
            <Route path="/studentTimetable" element={<StudentTimetable />} />
 
 
         <Route path="/StudentAttendance" element={<StudentAttendance/>} />
-        <Route path="/studentResults" element={<Results/>} />
-        <Route path="/studentFee" element={<FeePortal/>} />
+        <Route path="/results" element={<Results/>} />
+        <Route path="/FeePortal" element={<FeePortal/>} />
 
-
+        <Route path="/AdminAttendanceS" element={<AdminAttendanceS/>} />
+        <Route path="/AdminAttendance" element={<AdminAttendance/>} />
+        <Route path="/AdminDashboard" element={<AdminDashboard/>} />
+        <Route path="/AdminProfile" element={<AdminProfile/>} />
+        <Route path="/AdminTimetableManager" element={<AdminTimetableManager/>} />
       </Routes>
     </Router>
   );
