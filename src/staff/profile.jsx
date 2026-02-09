@@ -4,6 +4,8 @@ import {
   Users, Briefcase, MapPin, Phone, Mail, Globe, 
   Smartphone, PhoneCall, ShieldCheck, X 
 } from 'lucide-react';
+import Header from '../components/Header';
+import Footer from '../components/Footer'; 
 
 const StaffProfile = () => {
   const [activeTab, setActiveTab] = useState('Professional');
@@ -60,6 +62,8 @@ const StaffProfile = () => {
   );
 
   return (
+    <>
+    <Header/>
     <div className="flex-grow p-4 md:p-10 relative bg-[#f8fafc] min-h-screen font-sans">
       {/* Abstract Background Design */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
@@ -74,9 +78,14 @@ const StaffProfile = () => {
           <div className="bg-white rounded-[3rem] shadow-2xl p-8 border border-slate-100 text-center sticky top-10">
             <div className="relative w-40 h-40 mx-auto mb-6">
               <motion.div animate={{ rotate: 360 }} transition={{ duration: 25, repeat: Infinity, ease: "linear" }} className="absolute inset-0 border-2 border-dashed border-indigo-200 rounded-[3.5rem]" />
-              <div onClick={() => setModalType('photo')} className="absolute inset-2 bg-slate-100 rounded-[3rem] flex items-center justify-center cursor-pointer overflow-hidden border-4 border-white shadow-inner">
-                <Users size={64} className="text-slate-300" />
-              </div>
+              <div className="absolute inset-2 bg-white-900 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl flex items-center justify-center">
+                  <img
+                   src="/logo.png"   // or your actual image path / URL
+                   alt="Security"
+                   className="w-20 h-20 object-contain"
+                  />
+               </div>
+
               <div className="absolute bottom-2 right-4 w-6 h-6 bg-emerald-500 rounded-full border-4 border-white shadow-lg animate-pulse" />
             </div>
 
@@ -180,6 +189,8 @@ const StaffProfile = () => {
         )}
       </AnimatePresence>
     </div>
+    <Footer />
+    </>
   );
 };
 

@@ -4,6 +4,8 @@ import {
   ShieldCheck, Zap, MoreHorizontal, MapPin, 
   Users as UsersIcon, FlaskConical, BookOpen, Clock 
 } from 'lucide-react';
+import Header from '../components/Header';
+import Footer from '../components/Footer'; 
 
 const StaffTimetable = () => {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -33,6 +35,8 @@ const StaffTimetable = () => {
   };
 
   return (
+    <>
+    <Header/>
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }}
       className="min-h-screen bg-[#f8fafc] p-4 font-sans text-slate-700"
@@ -154,6 +158,8 @@ const StaffTimetable = () => {
         </div>
       </div>
     </motion.div>
+    <Footer />
+    </>
   );
 };
 

@@ -11,6 +11,8 @@ import {
   Mail, Smartphone, Globe, PhoneCall, X, ArrowRight, CheckCircle2
 
 } from 'lucide-react';
+import Header from '../components/Header';
+import Footer from '../components/Footer'; 
 
 
 
@@ -115,74 +117,50 @@ const StaffDashboard = () => {
 
 
   return (
-
+    <>
+    <Header/>
     <motion.main 
-
       initial="hidden" animate="visible" variants={containerVariants}
-
       className="min-h-screen bg-[#f1f5f9] p-4 md:p-10 font-sans text-slate-800"
-
     >
 
       <div className="max-w-7xl mx-auto w-full">
-
-        
-
         {/* Title Bar */}
-
         <motion.div variants={cardVariants} className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-
           <div className="flex items-center gap-4">
-
             <div className="p-3 bg-white rounded-2xl shadow-lg border border-slate-100">
-
                <div className="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold">GB</div>
-
             </div>
 
             <div>
-
               <h1 className="text-3xl font-black text-slate-900 tracking-tight">Staff Console</h1>
-
               <p className="text-indigo-600 font-bold uppercase text-[10px] tracking-[0.2em]">Grambasket Systems v2.0</p>
-
             </div>
-
           </div>
 
           <div className="bg-white/60 backdrop-blur-md p-3 px-6 rounded-2xl shadow-sm border border-white flex items-center gap-3">
-
             <Clock className="text-indigo-500 animate-pulse" size={18} />
-
             <p className="text-xs font-black text-slate-700 uppercase tracking-widest">Shift Status: 09:30 AM Entry</p>
-
           </div>
-
         </motion.div>
 
 
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-          
-
           {/* Profile Section */}
-
           <motion.div variants={cardVariants} className="lg:col-span-4">
-
             <div className="bg-white border border-slate-50 rounded-[3rem] shadow-2xl shadow-indigo-900/5 p-8 sticky top-10">
-
               <div className="relative w-40 h-40 mx-auto mb-6">
-
                 <motion.div animate={{ rotate: 360 }} transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-
                   className="absolute inset-0 border-[3px] border-dashed border-indigo-200 rounded-[3.5rem]" />
-
-                <div className="absolute inset-3 bg-slate-50 rounded-[2.8rem] overflow-hidden border-4 border-white shadow-inner flex items-center justify-center text-indigo-200">
-
-                   <Users size={56} />
-
+                <div className="absolute inset-2 bg-white-900 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl flex items-center justify-center">
+                  <img
+                   src="/logo.png"   // or your actual image path / URL
+                   alt="Security"
+                   className="w-30 h-30 object-contain"
+                  />
                 </div>
+
 
               </div>
 
@@ -373,6 +351,8 @@ const StaffDashboard = () => {
       </AnimatePresence>
 
     </motion.main>
+    <Footer/>
+    </>
 
   );
 

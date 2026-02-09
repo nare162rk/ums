@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserCheck, Clock, Calendar as CalendarIcon, ChevronRight } from 'lucide-react';
+import Header from '../components/Header';
+import Footer from '../components/Footer'; 
 
 // Animation Variants
 const containerVariants = {
@@ -80,6 +82,8 @@ const AdminAttendance = () => {
   };
 
   return (
+    <>
+    <Header/>
     <motion.div 
       variants={containerVariants}
       initial="hidden"
@@ -194,6 +198,8 @@ const AdminAttendance = () => {
         </motion.section>
       </div>
     </motion.div>
+    <Footer />
+    </>
   );
 };
 

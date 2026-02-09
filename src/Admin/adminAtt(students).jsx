@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, User, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
+import Header from '../components/Header';
+import Footer from '../components/Footer'; 
 
 const AdminAttendanceS = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -67,6 +69,8 @@ const AdminAttendanceS = () => {
   };
 
   return (
+    <>
+    <Header/>
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -178,6 +182,8 @@ const AdminAttendanceS = () => {
         )}
       </div>
     </motion.div>
+    <Footer />
+    </>
   );
 };
 

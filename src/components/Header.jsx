@@ -4,41 +4,95 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, GraduationCap, CalendarDays, 
   CreditCard, ChevronDown, UserCircle, LogOut, Settings, 
-  FileText, ClipboardCheck, PlayCircle, History, UserCheck, X 
+  FileText, ClipboardCheck, PlayCircle, UserCheck, X,
+  Users, ShieldCheck, BookOpen, Bell
 } from 'lucide-react';
 
-const NAV_DATA = [
-  { name: 'Dashboard', icon: <LayoutDashboard size={18} />, link: '/studentDashboard' },
-  { 
-    name: 'Exam', 
-    icon: <GraduationCap size={18} />, 
-    subLinks: [
-      { name: 'Admit Card', link: '/admit-card', icon: <FileText size={16} /> },
-      { name: 'Results', link: '/studentResults', icon: <ClipboardCheck size={16} /> },
-    ] 
-  },
-  { 
-    name: 'Time Table', 
-    icon: <CalendarDays size={18} />, 
-    subLinks: [
-      { name: 'Time Table', link: '/studentTimetable', icon: <CalendarDays size={16} /> },
-      { name: 'Attendance', link: '/studentAttendance', icon: <UserCheck size={16} /> },
-    ] 
-  },
-  { 
-    name: 'Fees', 
-    icon: <CreditCard size={18} />, 
-    subLinks: [
-      { name: 'Pay Fee', link: '/studentFee', icon: <PlayCircle size={16} /> },
-      
-    ] 
-  },
-];
+
+// 1. Organize data by Role
+const NAV_CONFIG = {
+  student: [
+    { name: 'Dashboard', icon: <LayoutDashboard size={18} />, link: '/studentDashboard' },
+    { 
+      name: 'Exam', 
+      icon: <GraduationCap size={18} />, 
+      subLinks: [
+        { name: 'Admit Card', link: '/admit-card', icon: <FileText size={16} /> },
+        { name: 'Results', link: '/studentResults', icon: <ClipboardCheck size={16} /> },
+      ] 
+    },
+    { 
+      name: 'Time Table', 
+      icon: <CalendarDays size={18} />, 
+      subLinks: [
+        { name: 'Time Table', link: '/studentTimetable', icon: <CalendarDays size={16} /> },
+        { name: 'Attendance', link: '/studentAttendance', icon: <UserCheck size={16} /> },
+      ] 
+    },
+    { 
+      name: 'Fees', 
+      icon: <CreditCard size={18} />, 
+      subLinks: [{ name: 'Pay Fee', link: '/studentFee', icon: <PlayCircle size={16} /> }] 
+    },
+  ],
+
+  admin: [
+    { name: 'Admin Dashboard', icon: <LayoutDashboard size={18} />, link: '/admin-dashboard' },
+    { 
+      name: 'Time Table', 
+      icon: <CalendarDays size={18} />, 
+      subLinks: [
+        { name: 'Time Table', link: '/admin-timetable-manager', icon: <CalendarDays size={16} /> },
+        { name: 'Attendance', link: '/admin-attendance', icon: <UserCheck size={16} /> },
+        { name: 'Student Attendance', link: '/admin-attendance-students', icon: <UserCheck size={16} /> },
+      ] 
+    },
+   { 
+      name: 'Settings', 
+      icon: <Settings size={18} />, 
+      subLinks: [
+        { name: 'Profile', link: '/admin-profile', icon: <UserCircle size={16} /> },
+        
+      ] 
+    },
+  ],
+
+  staff: [
+    { name: 'Staff Dashboard', icon: <LayoutDashboard size={18} />, link: '/staff-dashboard' },
+    { 
+      name: 'Time Table', 
+      icon: <CalendarDays size={18} />, 
+      subLinks: [
+        { name: 'Time Table', link: '/staff-timetable', icon: <CalendarDays size={16} /> },
+        { name: 'Attendance', link: '/staff-attendance', icon: <UserCheck size={16} /> },
+       
+      ] 
+    },
+     { 
+      name: 'Profile', 
+      icon: <UserCircle size={18} />, 
+      subLinks: [
+        { name: 'Profile', link: '/staff-profile', icon: <UserCircle size={16} /> },
+         
+      ] 
+    },
+  ]
+};
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeMobileSub, setActiveMobileSub] = useState(null);
   const location = useLocation();
+
+  // 2. Logic to determine current role based on URL
+  const getRole = () => {
+    if (location.pathname.startsWith('/admin')) return 'admin';
+    if (location.pathname.startsWith('/staff')) return 'staff';
+    return 'student'; // Default
+  };
+
+  const currentRole = getRole();
+  const navData = NAV_CONFIG[currentRole];
 
   const closeMenus = () => {
     setIsProfileOpen(false);
@@ -48,14 +102,14 @@ const Header = () => {
   return (
     <header className="bg-white/90 backdrop-blur-md shadow-sm w-full sticky top-0 z-50 px-4 md:px-10 h-16 flex justify-between items-center border-b border-gray-100">
       
-      {/* LEFT: Logo */}
-      <Link to="/studentDashboard" className="flex-shrink-0" onClick={closeMenus}>
+      {/* LEFT: Logo - Redirects based on role */}
+      <Link to={`/${currentRole}-Dashboard`} className="flex-shrink-0" onClick={closeMenus}>
         <img src="/logo.png" alt="University Logo" className="h-9 md:h-11 object-contain" />
       </Link>
 
       {/* MIDDLE: Desktop Navigation */}
       <nav className="hidden lg:flex items-center gap-8 h-full">
-        {NAV_DATA.map((item) => (
+        {navData.map((item) => (
           <div key={item.name} className="relative group h-full flex items-center">
             {item.subLinks ? (
               <div className="flex items-center gap-2 text-gray-600 group-hover:text-blue-600 font-medium transition-colors cursor-pointer py-5">
@@ -73,7 +127,6 @@ const Header = () => {
               </Link>
             )}
 
-            {/* Desktop Dropdown */}
             {item.subLinks && (
               <div className="absolute top-16 left-0 hidden group-hover:block w-52 pt-2">
                 <div className="bg-white shadow-xl rounded-b-xl border border-gray-100 py-2 overflow-hidden">
@@ -85,8 +138,7 @@ const Header = () => {
                         location.pathname === sub.link ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
                       }`}
                     >
-                      {sub.icon} {/* Corrected: Rendering the sub-link icon here */}
-                      {sub.name}
+                      {sub.icon} {sub.name}
                     </Link>
                   ))}
                 </div>
@@ -103,7 +155,10 @@ const Header = () => {
           onClick={() => setIsProfileOpen(!isProfileOpen)}
           className="flex items-center gap-2 p-1 pl-3 rounded-full bg-gray-50 border border-gray-200 hover:border-blue-300 transition-all cursor-pointer"
         >
-          <span className="hidden md:inline text-sm font-semibold text-gray-700">Student Portal</span>
+          {/* 3. Dynamic Portal Label */}
+          <span className="hidden md:inline text-sm font-semibold text-gray-700 capitalize">
+            {currentRole} Portal
+          </span>
           {isProfileOpen ? <X size={28} className="text-blue-600" /> : <UserCircle size={28} className="text-blue-600" />}
         </motion.button>
 
@@ -115,10 +170,9 @@ const Header = () => {
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               className="absolute right-0 top-14 w-72 bg-white shadow-2xl rounded-2xl border border-gray-100 overflow-hidden z-50"
             >
-              {/* Mobile Menu Section */}
               <div className="lg:hidden p-4 border-b border-gray-100 space-y-1">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Navigation</p>
-                {NAV_DATA.map((item) => (
+                {navData.map((item) => (
                   <div key={item.name}>
                     {item.subLinks ? (
                        <button 
@@ -149,8 +203,7 @@ const Header = () => {
                             onClick={closeMenus} 
                             className="flex items-center gap-3 py-2 text-sm text-gray-500 hover:text-blue-600"
                           >
-                            {sub.icon} {/* Corrected: Rendering the sub-link icon in mobile menu */}
-                            {sub.name}
+                            {sub.icon} {sub.name}
                           </Link>
                         ))}
                       </div>
@@ -159,7 +212,6 @@ const Header = () => {
                 ))}
               </div>
 
-              {/* Profile/Settings Section */}
               <div className="p-2">
                 <Link to="/settings" onClick={closeMenus} className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl">
                   <Settings size={18} /> Settings

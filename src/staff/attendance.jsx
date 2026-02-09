@@ -4,6 +4,8 @@ import {
   Users, Clock, AlertCircle, CheckCircle, 
   Calendar as CalIcon, TrendingUp, DollarSign, X 
 } from 'lucide-react';
+import Header from '../components/Header';
+import Footer from '../components/Footer'; 
 
 const StaffAttendance = () => {
   const [viewDetail, setViewDetail] = useState(null);
@@ -87,6 +89,8 @@ const StaffAttendance = () => {
   }
 
   return (
+    <>
+    <Header/>
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans">
       <div className="max-w-6xl mx-auto space-y-6">
         
@@ -193,6 +197,8 @@ const StaffAttendance = () => {
         </div>
       </div>
     </motion.div>
+    <Footer/>
+    </>
   );
 };
 

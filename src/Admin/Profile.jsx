@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Header from '../components/Header';
+import Footer from '../components/Footer'; 
 
 const AdminProfile = () => {
   const [activeTab, setActiveTab] = useState('OVERVIEW');
@@ -32,7 +34,10 @@ const AdminProfile = () => {
   );
 
   return (
+    <>
+    <Header />
     <div className="min-h-screen p-6 md:p-12 relative overflow-hidden font-sans bg-[#f8fafc]">
+      
       {/* Mesh Background */}
       <div className="fixed inset-0 -z-10">
         <motion.div 
@@ -66,7 +71,7 @@ const AdminProfile = () => {
           >
             <div className="relative w-40 h-40 mx-auto mb-6">
               <img 
-                src="https://ui-avatars.com/api/?name=Rajesh+Varma&background=6366f1&color=fff&size=200" 
+                src="/logo.png" 
                 alt="Admin" 
                 className="relative w-full h-full object-cover rounded-[2.5rem] border-4 border-white shadow-xl" 
               />
@@ -143,7 +148,10 @@ const AdminProfile = () => {
 
         </div>
       </div>
+      
     </div>
+    <Footer />
+    </>
   );
 };
 

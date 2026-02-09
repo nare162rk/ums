@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Settings, Save, Edit2, Trash2, Plus } from 'lucide-react';
+import Header from '../components/Header';
+import Footer from '../components/Footer'; 
 
 const AdminTimetableManager = () => {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -33,6 +35,8 @@ const AdminTimetableManager = () => {
   };
 
   return (
+    <>
+    <Header/>
     <div className="min-h-screen bg-slate-50 p-6 font-sans">
       {/* Admin Control Header */}
       <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm mb-6 border-l-4 border-blue-600">
@@ -122,6 +126,8 @@ const AdminTimetableManager = () => {
         <p>* Hover over a slot to reveal delete options</p>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 
