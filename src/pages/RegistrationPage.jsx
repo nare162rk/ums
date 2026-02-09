@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   Building2, Globe, MapPin, ShieldCheck, Mail, Phone, 
-  ClipboardCheck, Calendar, BookOpen, Users, Lock, BarChart3, FileText, Upload, Check, X, Eye, EyeOff
+  ClipboardCheck, Calendar, BookOpen, Users, Lock, BarChart3, 
+  FileText, Upload, Check, X, Eye, EyeOff, Camera, Loader2 
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- FIREBASE IMPORTS ---
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../firebase"; // Ensure this file exists with your config
 
 const RegistrationPage = () => {
     const [loading, setLoading] = useState(false);
+    const [uploadingStatus, setUploadingStatus] = useState({}); // Tracks upload status for each field
     const [rotation, setRotation] = useState(0);
     const [showPassword, setShowPassword] = useState(false);
 
@@ -45,67 +51,53 @@ const RegistrationPage = () => {
         match: formData.password === formData.confirmPassword && formData.confirmPassword !== ''
     };
 
-    const handleFileChange = (e, field) => {
+    // Unified Firebase Upload Logic
+    const handleFileUpload = async (e, field, isImage = false) => {
         const file = e.target.files[0];
-        if (file && file.type !== "application/pdf") {
-            alert("Upload Error: Only PDF format is allowed.");
-            e.target.value = "";
+        if (!file) return;
+
+        // Type Validation
+        if (!isImage && file.type !== "application/pdf") {
+            alert("Please upload PDF files only.");
             return;
         }
-        // In a real production app, you would upload this to Firebase Storage 
-        // and save the URL. For this test, we store the filename.
-        setFormData(prev => ({ ...prev, [field]: file.name }));
+
+        try {
+            setUploadingStatus(prev => ({ ...prev, [field]: 'loading' }));
+            
+            // 1. Create Storage Reference
+            const storageRef = ref(storage, `universities/${formData.name || 'unnamed'}/${field}_${Date.now()}`);
+            
+            // 2. Upload
+            const snapshot = await uploadBytes(storageRef, file);
+            
+            // 3. Get URL
+            const url = await getDownloadURL(snapshot.ref);
+            
+            setFormData(prev => ({ ...prev, [field]: url }));
+            setUploadingStatus(prev => ({ ...prev, [field]: 'success' }));
+        } catch (error) {
+            console.error("Firebase Error:", error);
+            setUploadingStatus(prev => ({ ...prev, [field]: 'error' }));
+            alert("Upload failed. Verify Firebase Storage rules.");
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         if (!Object.values(passwordChecks).every(Boolean)) {
             alert("Please satisfy all password requirements.");
             return;
         }
 
         setLoading(true);
-
         try {
             const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-            
-            // Constructing the object to match backend expectations
-            const submissionData = {
-                institutionType: formData.institutionType,
-                name: formData.name,
-                address: formData.address,
-                email: formData.email,
-                contactNumber: formData.contactNumber,
-                admin: {
-                    name: formData.adminName,
-                    officialEmail: formData.officialEmail,
-                    personalEmail: formData.personalEmail
-                },
-                taxInfo: {
-                    gstNumber: formData.gstNumber,
-                    panNumber: formData.panNumber
-                },
-                documents: {
-                    boardResolution: formData.boardResolution,
-                    authLetter: formData.authLetter,
-                    regDetails: formData.regDetails,
-                    gstCert: formData.gstCert,
-                    panCert: formData.panCert
-                },
-                auth: {
-                    password: formData.password // Note: Backend should hash this
-                }
-            };
-
-            const res = await axios.post(`${API_BASE_URL}/universities/onboard`, submissionData);
-            
-            if (res.data.success) {
-                alert(`✅ Registration successful! University ID: ${res.data.universityId}`);
-            }
+            const res = await axios.post(`${API_BASE_URL}/universities/onboard`, formData);
+            if (res.data.success) alert(`✅ Registration successful!`);
         } catch (err) {
             console.error(err);
-            alert("❌ Submission failed. Check if backend is running on port 5000.");
+            alert("❌ Submission failed. Check backend.");
         } finally {
             setLoading(false);
         }
@@ -121,7 +113,7 @@ const RegistrationPage = () => {
         <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center py-6 px-4 md:py-12">
             <div className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 bg-white shadow-2xl rounded-3xl overflow-hidden border border-slate-100">
                 
-                {/* Left Sidebar - Branding & Animation */}
+                {/* Left Sidebar - Branding */}
                 <div className="lg:col-span-4 bg-indigo-700 p-8 text-white flex flex-col items-center justify-between relative overflow-hidden hidden lg:flex">
                     <div className="z-10 text-center">
                         <div className="bg-white p-3 rounded-2xl inline-block mb-4 shadow-xl">
@@ -159,8 +151,35 @@ const RegistrationPage = () => {
                 </div>
 
                 {/* Right Side - Form */}
-                <form onSubmit={handleSubmit} className="lg:col-span-8 p-6 md:p-12 space-y-10 overflow-y-auto max-h-[90vh] custom-scrollbar">
+                <form onSubmit={handleSubmit} className="lg:col-span-8 p-6 md:p-12 space-y-10 overflow-y-auto max-h-[90vh] custom-scrollbar bg-white">
                     
+                    {/* PREMIUMLOGO UPLOAD UI SECTION */}
+                    <div className="flex flex-col items-center justify-center space-y-4">
+                        <div className="relative">
+                            <div className="w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-slate-50 flex items-center justify-center ring-2 ring-indigo-50">
+                                {formData.logo ? (
+                                    <img src={formData.logo} alt="Logo" className="w-full h-full object-cover" />
+                                ) : (
+                                    <Building2 className="text-slate-200 w-16 h-16" />
+                                )}
+                                
+                                {uploadingStatus.logo === 'loading' && (
+                                    <div className="absolute inset-0 bg-indigo-900/40 backdrop-blur-sm flex items-center justify-center">
+                                        <Loader2 className="text-white animate-spin" />
+                                    </div>
+                                )}
+                            </div>
+                            <label className="absolute bottom-0 right-0 bg-indigo-600 p-2.5 rounded-full text-white shadow-xl cursor-pointer hover:bg-indigo-700 transition-all active:scale-90 ring-4 ring-white">
+                                <Camera size={18} />
+                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'logo', true)} />
+                            </label>
+                        </div>
+                        <div className="text-center">
+                            <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest">Institution Brand Mark</h2>
+                            <p className="text-[10px] text-slate-400 font-bold">Square PNG or JPG (Max 2MB)</p>
+                        </div>
+                    </div>
+
                     <section className="space-y-6">
                         <h2 className="text-xl font-black text-slate-800 border-b pb-2 flex items-center gap-2 uppercase tracking-tight">
                             <Building2 className="text-indigo-600" size={20} /> Institute Details
@@ -185,10 +204,10 @@ const RegistrationPage = () => {
                             <input required placeholder="Representative Full Name" className="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all" onChange={e => setFormData({...formData, adminName: e.target.value})} />
                             <input required type="email" placeholder="Admin Official Email" className="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all" onChange={e => setFormData({...formData, officialEmail: e.target.value})} />
                             <input required type="email" placeholder="Admin Personal Email" className="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all" onChange={e => setFormData({...formData, personalEmail: e.target.value})} />
-                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FileField label="Board Resolution" onChange={e => handleFileChange(e, 'boardResolution')} />
-                                <FileField label="Authorization Letter" onChange={e => handleFileChange(e, 'authLetter')} />
-                                <FileField label="Registration Details" onChange={e => handleFileChange(e, 'regDetails')} />
+                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                                <FileField label="Board Resolution" status={uploadingStatus.boardResolution} onChange={e => handleFileUpload(e, 'boardResolution')} />
+                                <FileField label="Authorization Letter" status={uploadingStatus.authLetter} onChange={e => handleFileUpload(e, 'authLetter')} />
+                                <FileField label="Registration Details" status={uploadingStatus.regDetails} onChange={e => handleFileUpload(e, 'regDetails')} />
                             </div>
                         </div>
                     </section>
@@ -200,8 +219,8 @@ const RegistrationPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <input required placeholder="GST Number" className="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all" onChange={e => setFormData({...formData, gstNumber: e.target.value})} />
                             <input required placeholder="PAN Number" className="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all" onChange={e => setFormData({...formData, panNumber: e.target.value})} />
-                            <FileField label="GST Certificate" onChange={e => handleFileChange(e, 'gstCert')} />
-                            <FileField label="PAN Certificate" onChange={e => handleFileChange(e, 'panCert')} />
+                            <FileField label="GST Certificate" status={uploadingStatus.gstCert} onChange={e => handleFileUpload(e, 'gstCert')} />
+                            <FileField label="PAN Certificate" status={uploadingStatus.panCert} onChange={e => handleFileUpload(e, 'panCert')} />
                         </div>
                     </section>
 
@@ -238,8 +257,10 @@ const RegistrationPage = () => {
                         </div>
                     </section>
 
-                    <button disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 rounded-2xl shadow-xl transition-all transform active:scale-[0.98] disabled:bg-slate-300 uppercase tracking-widest text-sm">
-                        {loading ? "Processing Registration..." : "Complete Registration"}
+                    <button disabled={loading || Object.values(uploadingStatus).includes('loading')} 
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 rounded-2xl shadow-xl transition-all transform active:scale-[0.98] disabled:bg-slate-300 uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+                        {loading ? <Loader2 className="animate-spin" size={18} /> : null}
+                        {loading ? "Processing..." : Object.values(uploadingStatus).includes('loading') ? "Uploading Files..." : "Complete Registration"}
                     </button>
                 </form>
             </div>
@@ -247,11 +268,16 @@ const RegistrationPage = () => {
     );
 };
 
-const FileField = ({ label, onChange }) => (
+const FileField = ({ label, onChange, status }) => (
     <div className="flex flex-col gap-1">
-        <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">{label} (PDF Only)</label>
+        <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest flex items-center gap-2">
+            {label} 
+            {status === 'loading' && <Loader2 size={10} className="animate-spin text-indigo-600" />}
+            {status === 'success' && <Check size={10} className="text-emerald-500" />}
+        </label>
         <div className="relative">
-            <input required type="file" accept=".pdf" onChange={onChange} className="text-[11px] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-100 file:text-indigo-700 font-bold cursor-pointer hover:file:bg-indigo-200 transition-all border border-slate-200 rounded-xl w-full p-2 bg-slate-50" />
+            <input required type="file" accept=".pdf" onChange={onChange} 
+                className={`text-[11px] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-100 file:text-indigo-700 font-bold cursor-pointer hover:file:bg-indigo-200 transition-all border rounded-xl w-full p-2 bg-slate-50 ${status === 'success' ? 'border-emerald-200' : 'border-slate-200'}`} />
         </div>
     </div>
 );

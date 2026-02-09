@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { auth } from "../firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "../firebase"; 
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, Globe } from "lucide-react";
 
 export default function LoginPage() {
@@ -11,58 +12,64 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
 
-  // Hashes the password for secure backend transmission
-  const hashPassword = async (password) => {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hash = await window.crypto.subtle.digest("SHA-256", data);
-    return Array.from(new Uint8Array(hash))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // 1. Authenticate with Firebase
+      // 1. Firebase Auth Sign-in
       const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      const idToken = await userCredential.user.getIdToken();
+      const user = userCredential.user;
 
-      // 2. Hash the password immediately
-      const secureKey = await hashPassword(formData.password);
+      // 2. CHECK: Is this a University Admin account?
+      // We look for the document where admin.officialEmail matches the logged-in email
+      const uniQuery = query(collection(db, "universities"), where("officialEmail", "==", user.email));
+      const uniSnapshot = await getDocs(uniQuery);
 
-      // 3. Send Token, Hash, and Origin Domain for Validation
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+      if (!uniSnapshot.empty) {
+        const uniData = uniSnapshot.docs[0].data();
 
-      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          token: idToken, 
-          secureKey: secureKey,
-          originDomain: window.location.hostname // Automatically captures current domain
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        // Role-based Dashboard Access
-        if (result.role === 'sys-admin') {
-          navigate("/system-admin-dashboard");
-        } else if (result.role === 'uni-admin') {
-          navigate("/dashboard");
-        } else {
-          navigate("/student-portal");
+        // 3. BLOCK ACCESS IF NOT APPROVED
+        if (uniData.status !== "approved") {
+          await signOut(auth);
+          alert("Access Denied: Your institution is pending approval by the System Administrator.");
+          setLoading(false);
+          return;
         }
+
+        // IMPORTANT: We save the WHOLE uniData which includes the 'logo' URL
+        localStorage.setItem("user", JSON.stringify({ ...uniData, role: "admin" }));
+        navigate("/admin-dashboard");
+        return;
+      }
+
+      // 4. Default Role Logic (Students, Staff, Sys-Admin)
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        
+        // If they are students/staff, we still want to try to find their institute's logo
+        // For now, we save their profile data
+        localStorage.setItem("user", JSON.stringify(userData));
+
+        const role = userData.role;
+        if (role === "student") navigate("/student-dashboard");
+        else if (role === "admin") navigate("/admin-dashboard");
+        else if (role === "staff") navigate("/staff-dashboard");
+        else if (role === "sys-admin") navigate("/sys-admin-dashboard");
+        else navigate("/dashboard");
       } else {
-        // Specific error messages (e.g., "University not approved" or "Unauthorized Domain")
-        alert(result.message || "Access Denied.");
+        alert("Account verified, but no profile data found.");
+        await signOut(auth);
       }
     } catch (error) {
-      alert("Login failed: " + error.message);
+      if (error.code === 'auth/user-disabled') {
+        alert("This account has been disabled. Please contact the system administrator.");
+      } else {
+        alert("Login failed: " + error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -70,7 +77,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Orbs */}
       <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-100 rounded-full blur-[120px] opacity-60" />
       <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-indigo-50 rounded-full blur-[120px] opacity-60" />
 
@@ -81,17 +87,10 @@ export default function LoginPage() {
       >
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-white mb-4 shadow-lg shadow-indigo-200">
-            <img
-              src="/logo.png"
-              alt="UMS Logo"
-              className="h-20 w-15 object-contain"
-            />
+            <img src="/logo.png" alt="UMS Logo" className="h-20 w-15 object-contain" />
           </div>
-
           <h2 className="text-3xl font-bold text-slate-900">Welcome Back</h2>
           <p className="text-slate-500 mt-2">Access the UMS Portal</p>
-          
-          {/* Badge showing the current domain user is logging into */}
           <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-[10px] font-bold uppercase tracking-wider">
             <Globe size={12} /> {window.location.hostname}
           </div>
@@ -106,7 +105,7 @@ export default function LoginPage() {
                 type="email"
                 required
                 className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium"
-                placeholder="admin@university.edu"
+                placeholder="university@admin.com"
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>

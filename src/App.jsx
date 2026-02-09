@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ProtectedRoute from './ProtectedRoute';
 
 // ==========================================
 // 1. GENERAL & AUTHENTICATION PAGES
@@ -40,60 +41,59 @@ import AdminProfile from './Admin/Profile';
 import AdminAttendance from './Admin/adminAttendance';
 import AdminAttendanceS from './Admin/adminAtt(students)';
 import AdminTimetableManager from './Admin/TimetableManager';
+import AddStudent from './Admin/addStudent';
 
 function App() {
   return (
     <Router>
       <Routes>
-        
-       {/* ==========================================
-           1. GENERAL & AUTHENTICATION PAGES
-          ==========================================*/}
+        {/* ==========================================
+            1. GENERAL & AUTHENTICATION (Public)
+           ==========================================*/}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/university-registration" element={<RegistrationPage />} />
-        <Route path="/admin" element={<AdminApprovalPage />} />
-
-
-        {/*==========================================
-              UI Component Previews (Optional) 
-         ========================================== */}
-        <Route path="/header" element={<Header />} />
-        <Route path="/footer" element={<Footer />} />
-
 
         {/* ==========================================
-                        Student Routes 
+                         Student Routes 
+            (Locked: Only 'student' can enter)
            ========================================== */}
-        <Route path="/student-dashboard" element={<StudentDashboard />} />
-        <Route path="/student-profile" element={<StudentPortal />} />
-        <Route path="/student-timetable" element={<StudentTimetable />} />
-        <Route path="/student-attendance" element={<StudentAttendance />} />
-        <Route path="/results" element={<Results />} />
-        <Route path="/fee-portal" element={<FeePortal />} />
-
-
-        {/* ==========================================
-                        Staff Routes 
-            ========================================== */}
-        <Route path="/staff-dashboard" element={<StaffDashboard />} />
-        <Route path="/staff-profile" element={<StaffProfile />} />
-        <Route path="/staff-attendance" element={<StaffAttendance />} />
-        <Route path="/staff-timetable" element={<StaffTimetable />} />
-
+        <Route element={<ProtectedRoute allowedRoles={['student']} />}>
+          <Route path="/student-dashboard" element={<StudentDashboard />} />
+          <Route path="/student-profile" element={<StudentPortal />} />
+          <Route path="/student-timetable" element={<StudentTimetable />} />
+          <Route path="/student-attendance" element={<StudentAttendance />} />
+          <Route path="/results" element={<Results />} />
+          <Route path="/fee-portal" element={<FeePortal />} />
+        </Route>
 
         {/* ==========================================
-                      Admin Routes 
+                         Staff Routes 
+             (Locked: Only 'staff' can enter)
             ========================================== */}
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        <Route path="/admin-profile" element={<AdminProfile />} />
-        <Route path="/admin-attendance" element={<AdminAttendance />} />
-        <Route path="/admin-attendance-students" element={<AdminAttendanceS />} />
-        <Route path="/admin-timetable-manager" element={<AdminTimetableManager />} />
+        <Route element={<ProtectedRoute allowedRoles={['staff']} />}>
+          <Route path="/staff-dashboard" element={<StaffDashboard />} />
+          <Route path="/staff-profile" element={<StaffProfile />} />
+          <Route path="/staff-attendance" element={<StaffAttendance />} />
+          <Route path="/staff-timetable" element={<StaffTimetable />} />
+        </Route>
+
+        {/* ==========================================
+                         Admin Routes 
+             (Locked: Only 'admin' can enter)
+            ========================================== */}
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+          <Route path="/admin" element={<AdminApprovalPage />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin-profile" element={<AdminProfile />} />
+          <Route path="/admin-attendance" element={<AdminAttendance />} />
+          <Route path="/admin-attendance-students" element={<AdminAttendanceS />} />
+          <Route path="/admin-timetable-manager" element={<AdminTimetableManager />} />
+          <Route path="/admin-add-student" element={<AddStudent />} />
+        </Route>
+
       </Routes>
     </Router>
   );
 }
-
 export default App;

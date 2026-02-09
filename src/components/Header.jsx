@@ -1,126 +1,143 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  LayoutDashboard, GraduationCap, CalendarDays, 
-  CreditCard, ChevronDown, UserCircle, LogOut, Settings, 
-  FileText, ClipboardCheck, PlayCircle, UserCheck, X,
-  Users, ShieldCheck, BookOpen, Bell
+import {   
+  LayoutDashboard, GraduationCap, CalendarDays,   
+  CreditCard, ChevronDown, UserCircle, LogOut, Settings,   
+  FileText, ClipboardCheck, PlayCircle, UserCheck, X, Building2
 } from 'lucide-react';
 
-
-// 1. Organize data by Role
+// --- NAV_CONFIG DEFINITION ---
 const NAV_CONFIG = {
   student: [
-    { name: 'Dashboard', icon: <LayoutDashboard size={18} />, link: '/studentDashboard' },
+    { name: 'Dashboard', icon: <LayoutDashboard size={18} />, link: '/student-dashboard' },
     { 
       name: 'Exam', 
       icon: <GraduationCap size={18} />, 
       subLinks: [
         { name: 'Admit Card', link: '/admit-card', icon: <FileText size={16} /> },
-        { name: 'Results', link: '/studentResults', icon: <ClipboardCheck size={16} /> },
+        { name: 'Results', link: '/results', icon: <ClipboardCheck size={16} /> },
       ] 
     },
     { 
       name: 'Time Table', 
       icon: <CalendarDays size={18} />, 
       subLinks: [
-        { name: 'Time Table', link: '/studentTimetable', icon: <CalendarDays size={16} /> },
-        { name: 'Attendance', link: '/studentAttendance', icon: <UserCheck size={16} /> },
+        { name: 'Time Table', link: '/student-timetable', icon: <CalendarDays size={16} /> },
+        { name: 'Attendance', link: '/student-attendance', icon: <UserCheck size={16} /> },
       ] 
     },
     { 
       name: 'Fees', 
       icon: <CreditCard size={18} />, 
-      subLinks: [{ name: 'Pay Fee', link: '/studentFee', icon: <PlayCircle size={16} /> }] 
+      subLinks: [{ name: 'Pay Fee', link: '/fee-portal', icon: <PlayCircle size={16} /> }] 
     },
   ],
-
   admin: [
     { name: 'Admin Dashboard', icon: <LayoutDashboard size={18} />, link: '/admin-dashboard' },
     { 
-      name: 'Time Table', 
+      name: 'Management', 
       icon: <CalendarDays size={18} />, 
       subLinks: [
-        { name: 'Time Table', link: '/admin-timetable-manager', icon: <CalendarDays size={16} /> },
-        { name: 'Attendance', link: '/admin-attendance', icon: <UserCheck size={16} /> },
+        { name: 'Timetable Manager', link: '/admin-timetable-manager', icon: <CalendarDays size={16} /> },
+        { name: 'Staff Attendance', link: '/admin-attendance', icon: <UserCheck size={16} /> },
         { name: 'Student Attendance', link: '/admin-attendance-students', icon: <UserCheck size={16} /> },
       ] 
     },
-   { 
-      name: 'Settings', 
-      icon: <Settings size={18} />, 
-      subLinks: [
-        { name: 'Profile', link: '/admin-profile', icon: <UserCircle size={16} /> },
-        
-      ] 
-    },
+    { name: 'Admin Profile', icon: <UserCircle size={18} />, link: '/admin-profile' },
   ],
-
   staff: [
     { name: 'Staff Dashboard', icon: <LayoutDashboard size={18} />, link: '/staff-dashboard' },
     { 
-      name: 'Time Table', 
+      name: 'Schedule', 
       icon: <CalendarDays size={18} />, 
       subLinks: [
-        { name: 'Time Table', link: '/staff-timetable', icon: <CalendarDays size={16} /> },
+        { name: 'Timetable', link: '/staff-timetable', icon: <CalendarDays size={16} /> },
         { name: 'Attendance', link: '/staff-attendance', icon: <UserCheck size={16} /> },
-       
       ] 
     },
-     { 
-      name: 'Profile', 
-      icon: <UserCircle size={18} />, 
-      subLinks: [
-        { name: 'Profile', link: '/staff-profile', icon: <UserCircle size={16} /> },
-         
-      ] 
-    },
+    { name: 'Staff Profile', icon: <UserCircle size={18} />, link: '/staff-profile' },
   ]
 };
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [activeMobileSub, setActiveMobileSub] = useState(null);
+  const [currentRole, setCurrentRole] = useState('student');
+  const [instituteLogo, setInstituteLogo] = useState("/logo.png"); // Local fallback
   const location = useLocation();
+  const navigate = useNavigate();
+  const [instituteName, setInstituteName] = useState("Portal Gateway");
 
-  // 2. Logic to determine current role based on URL
-  const getRole = () => {
-    if (location.pathname.startsWith('/admin')) return 'admin';
-    if (location.pathname.startsWith('/staff')) return 'staff';
-    return 'student'; // Default
-  };
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      
+      // 1. Set Nav Role
+      if (user.role === 'uni-admin' || user.role === 'sys-admin') {
+        setCurrentRole('admin');
+      } else {
+        setCurrentRole(user.role);
+      }
 
-  const currentRole = getRole();
-  const navData = NAV_CONFIG[currentRole];
+      // 2. LOGO LOGIC
+      // If the logged-in user is a sys-admin (Your Employee), show your logo
+      if (user.role === 'sys-admin') {
+        setInstituteLogo("/logo.png");
+      } 
+      // If the user has a 'logo' field in the saved object, use it!
+      else if (user.logo) {
+        setInstituteLogo(user.logo);
+      } else {
+        setInstituteLogo("/logo.png");
+      }
+      setInstituteName(user.name || "Portal Gateway");
+    }
+  }, [location]);
 
-  const closeMenus = () => {
-    setIsProfileOpen(false);
-    setActiveMobileSub(null);
+  const navData = NAV_CONFIG[currentRole] || NAV_CONFIG.student;
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
   return (
-    <header className="bg-white/90 backdrop-blur-md shadow-sm w-full sticky top-0 z-50 px-4 md:px-10 h-16 flex justify-between items-center border-b border-gray-100">
+    <header className="bg-white/90 backdrop-blur-md shadow-sm w-full sticky top-0 z-50 px-4 md:px-10 h-25 flex justify-between items-center border-b border-gray-100">
       
-      {/* LEFT: Logo - Redirects based on role */}
-      <Link to={`/${currentRole}-Dashboard`} className="flex-shrink-0" onClick={closeMenus}>
-        <img src="/logo.png" alt="University Logo" className="h-9 md:h-11 object-contain" />
+      {/* LEFT: Dynamic Institute Logo */}
+      <Link to={`/${currentRole}-dashboard`} className="flex-shrink-0 flex items-center gap-3">
+        <div className="h-20 w-20 flex items-center justify-center overflow-hidden rounded-lg bg-white border border-slate-100 shadow-sm">
+          {instituteLogo ? (
+            <img 
+              src={instituteLogo} 
+              alt="Logo" 
+              className="h-full w-full object-contain p-1"
+              onError={(e) => e.target.src = "/logo.png"} 
+            />
+          ) : (
+            <Building2 className="text-slate-300" size={24} />
+          )}
+        </div>
+        <span className="hidden sm:block font-black text-slate-800 text-[20px] uppercase tracking-widest">
+           {instituteName} UMS PORTAL
+        </span>
       </Link>
 
-      {/* MIDDLE: Desktop Navigation */}
+      {/* MIDDLE: Navigation */}
       <nav className="hidden lg:flex items-center gap-8 h-full">
         {navData.map((item) => (
           <div key={item.name} className="relative group h-full flex items-center">
             {item.subLinks ? (
-              <div className="flex items-center gap-2 text-gray-600 group-hover:text-blue-600 font-medium transition-colors cursor-pointer py-5">
+              <div className="flex items-center gap-2 text-slate-600 group-hover:text-indigo-600 font-bold text-xs transition-colors cursor-pointer py-5 uppercase tracking-tighter">
                 {item.icon} {item.name}
                 <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
               </div>
             ) : (
               <Link
                 to={item.link}
-                className={`flex items-center gap-2 font-medium transition-colors ${
-                  location.pathname === item.link ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'
+                className={`flex items-center gap-2 font-bold text-xs uppercase tracking-tighter transition-colors ${
+                  location.pathname === item.link ? 'text-indigo-600' : 'text-slate-600 hover:text-indigo-600'
                 }`}
               >
                 {item.icon} {item.name}
@@ -129,13 +146,13 @@ const Header = () => {
 
             {item.subLinks && (
               <div className="absolute top-16 left-0 hidden group-hover:block w-52 pt-2">
-                <div className="bg-white shadow-xl rounded-b-xl border border-gray-100 py-2 overflow-hidden">
+                <div className="bg-white shadow-2xl rounded-2xl border border-slate-100 py-2 overflow-hidden">
                   {item.subLinks.map((sub) => (
                     <Link 
                       key={sub.name} 
                       to={sub.link} 
-                      className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-                        location.pathname === sub.link ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                      className={`flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-colors ${
+                        location.pathname === sub.link ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'
                       }`}
                     >
                       {sub.icon} {sub.name}
@@ -148,78 +165,36 @@ const Header = () => {
         ))}
       </nav>
 
-      {/* RIGHT: Profile & Mobile Toggle */}
-      <div className="relative flex items-center gap-4">
+      {/* RIGHT: Profile */}
+      <div className="relative">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsProfileOpen(!isProfileOpen)}
-          className="flex items-center gap-2 p-1 pl-3 rounded-full bg-gray-50 border border-gray-200 hover:border-blue-300 transition-all cursor-pointer"
+          className="flex items-center gap-2 p-1.5 pl-4 rounded-full bg-slate-50 border border-slate-200 hover:border-indigo-400 transition-all cursor-pointer"
         >
-          {/* 3. Dynamic Portal Label */}
-          <span className="hidden md:inline text-sm font-semibold text-gray-700 capitalize">
-            {currentRole} Portal
+          <span className="hidden md:inline text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">
+            {currentRole}
           </span>
-          {isProfileOpen ? <X size={28} className="text-blue-600" /> : <UserCircle size={28} className="text-blue-600" />}
+          <UserCircle size={26} className="text-indigo-600" />
         </motion.button>
 
         <AnimatePresence>
           {isProfileOpen && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="absolute right-0 top-14 w-72 bg-white shadow-2xl rounded-2xl border border-gray-100 overflow-hidden z-50"
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="absolute right-0 top-14 w-64 bg-white shadow-2xl rounded-3xl border border-slate-100 overflow-hidden z-50 p-2"
             >
-              <div className="lg:hidden p-4 border-b border-gray-100 space-y-1">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Navigation</p>
-                {navData.map((item) => (
-                  <div key={item.name}>
-                    {item.subLinks ? (
-                       <button 
-                        onClick={() => setActiveMobileSub(activeMobileSub === item.name ? null : item.name)}
-                        className="flex items-center justify-between w-full p-2 text-gray-700 hover:bg-blue-50 rounded-lg cursor-pointer"
-                       >
-                        <div className="flex items-center gap-3">{item.icon} {item.name}</div>
-                        <ChevronDown size={14} className={`transition-transform ${activeMobileSub === item.name ? 'rotate-180' : ''}`} />
-                      </button>
-                    ) : (
-                      <Link 
-                        to={item.link} 
-                        onClick={closeMenus}
-                        className={`flex items-center gap-3 w-full p-2 rounded-lg ${
-                          location.pathname === item.link ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-blue-50'
-                        }`}
-                      >
-                        {item.icon} {item.name}
-                      </Link>
-                    )}
-                    
-                    {item.subLinks && activeMobileSub === item.name && (
-                      <div className="ml-9 mt-1 space-y-1 border-l-2 border-blue-100 pl-4">
-                        {item.subLinks.map(sub => (
-                          <Link 
-                            key={sub.name} 
-                            to={sub.link} 
-                            onClick={closeMenus} 
-                            className="flex items-center gap-3 py-2 text-sm text-gray-500 hover:text-blue-600"
-                          >
-                            {sub.icon} {sub.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="p-2">
-                <Link to="/settings" onClick={closeMenus} className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl">
-                  <Settings size={18} /> Settings
-                </Link>
-                <button className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl text-left cursor-pointer">
-                  <LogOut size={18} /> Logout
-                </button>
-              </div>
+              <Link to={`/${currentRole}-profile`} className="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-2xl transition-colors">
+                <Settings size={18} /> Settings
+              </Link>
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-3 w-full px-4 py-3 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-2xl text-left transition-colors cursor-pointer"
+              >
+                <LogOut size={18} /> Logout
+              </button>
             </motion.div>
           )}
         </AnimatePresence>

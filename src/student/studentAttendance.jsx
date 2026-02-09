@@ -34,7 +34,6 @@ const StudentAttendance = () => {
 
   // --- API FETCH: Daily Detail ---
   const handleDateClick = async (day) => {
-    // Formatting date to match DB keys: DD-MM-YYYY
     const formattedDateForDB = `${day}-${selectedDate.getMonth() + 1}-${selectedDate.getFullYear()}`;
     const displayDate = `${day}/${selectedDate.getMonth() + 1}/${selectedDate.getFullYear()}`;
 
@@ -71,11 +70,9 @@ const StudentAttendance = () => {
     );
   }
 
-  // Fallback in case stats are missing
-  const currentStats = stats || {
-    attendanceSummary: { totalSlots: 0, presentSlots: 0, absentSlots: 0, percentage: 0 },
-    absentDays: { partialAbsent: 0, fullAbsent: 0, totalAbsentSlots: 0 }
-  };
+  // FIXED LOGIC: Based on your provided image, absentDays is INSIDE attendanceSummary
+  const currentSummary = stats?.attendanceSummary || { totalSlots: 0, presentSlots: 0, absentSlots: 0, percentage: 0 };
+  const currentAbsent = stats?.attendanceSummary?.absentDays || { partialAbsent: 0, fullAbsent: 0, totalAbsentSlots: 0 };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 font-sans text-slate-900">
@@ -102,10 +99,10 @@ const StudentAttendance = () => {
                 Attendance Summary
               </motion.h2>
               <div className="grid grid-cols-2 gap-4">
-                <StatCard label="Total Slots" value={currentStats.attendanceSummary.totalSlots} />
-                <StatCard label="Present Slots" value={currentStats.attendanceSummary.presentSlots} />
-                <StatCard label="Absent Slots" value={currentStats.attendanceSummary.absentSlots} />
-                <StatCard label="Present %" value={`${currentStats.attendanceSummary.percentage}%`} highlight />
+                <StatCard label="Total Slots" value={currentSummary.totalSlots} />
+                <StatCard label="Present Slots" value={currentSummary.presentSlots} />
+                <StatCard label="Absent Slots" value={currentSummary.absentSlots} />
+                <StatCard label="Present %" value={`${currentSummary.percentage}%`} highlight />
               </div>
             </motion.section>
 
@@ -115,9 +112,9 @@ const StudentAttendance = () => {
             >
               <h2 className="text-xl font-bold text-red-700 mb-4">Absent Days</h2>
               <div className="grid grid-cols-3 gap-3">
-                <StatCard label="Partial Absent" value={currentStats.absentDays.partialAbsent} />
-                <StatCard label="Full Absent" value={currentStats.absentDays.fullAbsent} />
-                <StatCard label="Total Absent Slots" value={currentStats.absentDays.totalAbsentSlots} />
+                <StatCard label="Partial Absent" value={currentAbsent.partialAbsent} />
+                <StatCard label="Full Absent" value={currentAbsent.fullAbsent} />
+                <StatCard label="Total Absent Slots" value={currentAbsent.totalAbsentSlots} />
               </div>
             </motion.section>
           </div>
@@ -139,10 +136,8 @@ const StudentAttendance = () => {
                 <div key={d} className="text-center text-xs font-bold text-gray-400 uppercase py-2">{d}</div>
               ))}
               
-              {/* Padding for first day of month */}
               {[...Array(firstDayOfMonth)].map((_, i) => <div key={`empty-${i}`} />)}
               
-              {/* Day buttons */}
               {[...Array(daysInMonth(selectedDate))].map((_, i) => (
                 <motion.button
                   key={i + 1}
@@ -156,7 +151,6 @@ const StudentAttendance = () => {
               ))}
             </div>
 
-            {/* --- Detail Overlay --- */}
             <AnimatePresence>
               {viewDetail && (
                 <motion.div 
@@ -190,7 +184,6 @@ const StudentAttendance = () => {
   );
 };
 
-// --- Sub-component: StatCard ---
 const StatCard = ({ label, value, highlight }) => (
   <div className={`p-4 rounded-lg border transition-all duration-300 ${
     highlight 
